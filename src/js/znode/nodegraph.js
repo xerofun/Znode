@@ -307,6 +307,7 @@ function NodeGraph(){
     }
    
     n.append("<textarea class='txt' spellcheck='false' />");
+
     var txt = $(".node .txt").last();
     txt.css("position","absolute");
    
@@ -327,6 +328,21 @@ function NodeGraph(){
                  "background-color" : "white", "font-size" : "1px",
                  "border" : "1px solid gray",
                  "cursor" : "pointer"});
+            
+    // Add source button
+    n.append("<div class='sourceBtn'>&hellip;<\/div>");
+    var sourceButton = $(".node .sourceBtn").last();
+    
+    sourceButton.css({"position": "absolute",
+                      "z-index": 10,
+                      "width": "10px",
+                      "height": "10px",
+                      "left": "-1px",
+                      "top": nodeHeight - 11,
+                      "background-color": "white",
+                      "font-size": "7px",
+                      "border" : "1px solid gray",
+                      "cursor": "pointer"});
     
     n.append("<div class='left'>");
     n.append("<div class='top'>");
@@ -352,6 +368,8 @@ function NodeGraph(){
     positionTop();
     positionBottom();
     
+    positionSourceButton();
+    
     this.left = left;
     this.right = right;
     this.top = top;
@@ -368,6 +386,12 @@ function NodeGraph(){
     }
     function positionBottom(){
       bottom.css("top",n.height() + 1).css("left", n.width() / 2 - 5);
+    }
+    
+    // Update the position of the source button
+    function positionSourceButton()
+    {
+        sourceButton.css("top", n.height() - 11);
     }
     
     function setupConnection(div){
@@ -456,6 +480,9 @@ function NodeGraph(){
         positionRight();
         positionTop();
         positionBottom();
+        
+        positionSourceButton();
+        
         updateConnections();
       });
     });
