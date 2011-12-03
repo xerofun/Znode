@@ -544,8 +544,7 @@ function NodeGraph(){
       var n = data.nodes[i];
       var ex = (i == "0") ? true : false;
       var temp = new Node(n.x, n.y, n.width, n.height, ex, n.id);
-      var addreturns = n.txt.replace(/\\n/g,'\n');
-      temp.txt.val(addreturns);
+      temp.txt.val(n.txt);
     }
     for (i in data.connections){
       var c = data.connections[i];
@@ -586,9 +585,9 @@ function NodeGraph(){
   }
   
   function addSlashes(str) {
-    str = str.replace(/\\/g,'\\\\');
+    str = str.replace(/\\/g,'\\\\\\\\');
     str = str.replace(/\'/g,'\\\'');
-    str = str.replace(/\"/g,'\\"');
+    str = str.replace(/\"/g,'\\\\"');
     str = str.replace(/\0/g,'\\0');
     str = str.replace(/\n/g,'\\\\n');
     return str;
