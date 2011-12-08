@@ -18,6 +18,8 @@ function NodeGraph(){
   var SHIFT = 16;
   var topHeight = $("#controls").height();
   
+  var resizerWidth = 10;
+  
   var paper = new Raphael("canvas", "100", "100");
   
   function resizePaper(){
@@ -311,9 +313,10 @@ function NodeGraph(){
     var txt = $(".node .txt").last();
     txt.css("position","absolute");
    
-    txt.css({"width" : nodeWidth - 5,
+    txt.css({"width" : nodeWidth - 5 - (resizerWidth + 1),
              "height" : nodeHeight - bar.height() - 5,
-             "resize" : "none", "overflow" : "hidden",
+             "margin-left" : (resizerWidth + 1),
+             "resize" : "none", "overflow" : "scroll",
              "font-size" : "12px" , "font-family" : "sans-serif",
              "border" : "none","z-index":4});
           
@@ -324,7 +327,8 @@ function NodeGraph(){
     
     resizer.css({"position" : "absolute" , "z-index" : 10,
                  "width" : "10px", "height" : "10px",
-                 "left" : nodeWidth - 11, "top" : nodeHeight - 11,
+                 "left" : nodeWidth - (resizerWidth + 1), 
+                 "top" : nodeHeight - (resizerWidth + 1),
                  "background-color" : "white", "font-size" : "1px",
                  "border" : "1px solid gray",
                  "cursor" : "pointer"});
@@ -338,7 +342,7 @@ function NodeGraph(){
                       "width": "10px",
                       "height": "10px",
                       "left": "-1px",
-                      "top": nodeHeight - 11,
+                      "top": nodeHeight - (resizerWidth + 1),
                       "background-color": "white",
                       "font-size": "7px",
                       "border" : "1px solid gray",
@@ -391,7 +395,7 @@ function NodeGraph(){
     // Update the position of the source button
     function positionSourceButton()
     {
-        sourceButton.css("top", n.height() - 11);
+        sourceButton.css("top", n.height() - (resizerWidth + 1));
     }
     
     function setupConnection(div){
@@ -474,7 +478,7 @@ function NodeGraph(){
         n.css({"width" : x + resizer.width() + 1,
                "height" : y + resizer.height() + 1});
         
-        txt.css({"width" : n.width() - 5, "height" : n.height() - bar.height() - 5});
+        txt.css({"width" : n.width() - 5 - (resizerWidth + 1), "height" : n.height() - bar.height() - 5});
         
         positionLeft();
         positionRight();
