@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -9,231 +10,234 @@
     <script type="text/javascript" src="js/libs/raphael.js"></script>
     <script type="text/javascript" src="js/znode/nodegraph.js"></script>
     <script type="text/javascript" src="js/znode/ui.js"></script>
-    <link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
-    <script type="text/javascript" src="js/jquery-1.6.2.min.js"></script>
-    <script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
-    <script>
-    $(window).resize(function() 
-    {
-        $('.scroll-content').css('height', $(window).height() - $('#controls').height() - $('.scroll-bar-wrap').height() - 10);
-    });
+	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
+	<script type="text/javascript" src="js/jquery-1.6.2.min.js"></script>
+	<script type="text/javascript" src="js/jquery-ui-1.8.16.custom.min.js"></script>
+	<script>
+	$(window).resize(function() 
+	{
+		$('.scroll-content').css('height', $(window).height() - $('#controls').height() - $('.scroll-bar-wrap').height() - 10);
+	});
+	
+	
+	
+	$(function() {
+		//scrollpane parts
+		var scrollPane = $( ".scroll-pane" ),
+			scrollContent = $( ".scroll-content" );
+			
+		//build slider
+		var scrollbar = $( ".scroll-bar" ).slider({
+			slide: function( event, ui ) {
+				if ( scrollContent.width() > scrollPane.width() ) {
+					scrollContent.css( "margin-left", Math.round(
+						ui.value / 100 * ( scrollPane.width() - scrollContent.width() )
+					) + "px" );
+				} else {
+					scrollContent.css( "margin-left", 0 );
+				}
+			}
+		});
+		
+		//append icon to handle
+		var handleHelper = scrollbar.find( ".ui-slider-handle" )
+		.mousedown(function() {
+			scrollbar.width( handleHelper.width() );
+		})
+		.mouseup(function() {
+			scrollbar.width( "100%" );
+		})
+		.append( "<span class='ui-icon ui-icon-grip-dotted-vertical'></span>" )
+		.wrap( "<div class='ui-handle-helper-parent'></div>" ).parent();
+		
+		//change overflow to hidden now that slider handles the scrolling
+		scrollPane.css( "overflow", "hidden" );
+		
+		//size scrollbar and handle proportionally to scroll distance
+		function sizeScrollbar() {
+			var remainder = scrollContent.width() - scrollPane.width();
+			var proportion = remainder / scrollContent.width();
+			var handleSize = scrollPane.width() - ( proportion * scrollPane.width() );
+			scrollbar.find( ".ui-slider-handle" ).css({
+				width: handleSize,
+				"margin-left": -handleSize / 2
+			});
+			handleHelper.width( "" ).width( scrollbar.width() - handleSize );
+		}
+		
+		//reset slider value based on scroll content position
+		function resetValue() {
+			var remainder = scrollPane.width() - scrollContent.width();
+			var leftVal = scrollContent.css( "margin-left" ) === "auto" ? 0 :
+				parseInt( scrollContent.css( "margin-left" ) );
+			var percentage = Math.round( leftVal / remainder * 100 );
+			scrollbar.slider( "value", percentage );
+		}
+		
+		//if the slider is 100% and window gets larger, reveal content
+		function reflowContent() {
+				var showing = scrollContent.width() + parseInt( scrollContent.css( "margin-left" ), 10 );
+				var gap = scrollPane.width() - showing;
+				if ( gap > 0 ) {
+					scrollContent.css( "margin-left", parseInt( scrollContent.css( "margin-left" ), 10 ) + gap );
+				}
+		}
+		
+		//change handle position on window resize
+		$( window ).resize(function() {
+			resetValue();
+			sizeScrollbar();
+			reflowContent();
+		});
+		//init scrollbar size
+		setTimeout( sizeScrollbar, 10 );//safari wants a timeout
+		
+		$('.scroll-content').css('height', $(window).height() - $('#controls').height() - $('.scroll-bar-wrap').height() - 10);
+	});
+	</script>
+	
+	<style>
+		#demo-frame > div.demo { padding: 10px !important; }
+		.scroll-pane { overflow: auto; width: 99%; float:left;}
+		.scroll-content { width: 2440px; float: left;}
+		.scroll-content-item { width: 100px; height: 100px; float: left; margin: 10px; font-size: 3em; text-align: center; }
+		* html .scroll-content-item { display: inline; } /* IE6 float double margin bug */
+		.scroll-bar-wrap { clear: left; padding: 0 4px 0 2px; margin: 0 -1px -1px -1px; }
+		.scroll-bar-wrap .ui-slider { background: none; border:0; height: 2em; margin: 0 auto;  }
+		.scroll-bar-wrap .ui-handle-helper-parent { position: relative; width: 100%; height: 100%; margin: 0 auto; }
+		.scroll-bar-wrap .ui-slider-handle { top:.2em; height: 1.5em; }
+		.scroll-bar-wrap .ui-slider-handle .ui-icon { margin: -8px auto 0; position: relative; top: 50%; }
 
-    $(function() {
-        //scrollpane parts
-        var scrollPane = $( ".scroll-pane" ),
-            scrollContent = $( ".scroll-content" );
 
-        //build slider
-        var scrollbar = $( ".scroll-bar" ).slider({
-            slide: function( event, ui ) {
-                if ( scrollContent.width() > scrollPane.width() ) {
-                    scrollContent.css( "margin-left", Math.round(
-                        ui.value / 100 * ( scrollPane.width() - scrollContent.width() )
-                    ) + "px" );
-                } else {
-                    scrollContent.css( "margin-left", 0 );
-                }
-            }
-        });
-
-        //append icon to handle
-        var handleHelper = scrollbar.find( ".ui-slider-handle" )
-        .mousedown(function() {
-            scrollbar.width( handleHelper.width() );
-        })
-        .mouseup(function() {
-            scrollbar.width( "100%" );
-        })
-        .append( "<span class='ui-icon ui-icon-grip-dotted-vertical'></span>" )
-        .wrap( "<div class='ui-handle-helper-parent'></div>" ).parent();
-
-        //change overflow to hidden now that slider handles the scrolling
-        crollPane.css( "overflow", "hidden" );
-
-        //size scrollbar and handle proportionally to scroll distance
-        function sizeScrollbar() {
-            var remainder = scrollContent.width() - scrollPane.width();
-            var proportion = remainder / scrollContent.width();
-            var handleSize = scrollPane.width() - ( proportion * scrollPane.width() );
-            scrollbar.find( ".ui-slider-handle" ).css({
-                width: handleSize,
-                "margin-left": -handleSize / 2
-            });
-            handleHelper.width( "" ).width( scrollbar.width() - handleSize );
-        }
-
-        //reset slider value based on scroll content position
-        function resetValue() {
-            var remainder = scrollPane.width() - scrollContent.width();
-            var leftVal = scrollContent.css( "margin-left" ) === "auto" ? 0 :
-                parseInt( scrollContent.css( "margin-left" ) );
-            var percentage = Math.round( leftVal / remainder * 100 );
-            scrollbar.slider( "value", percentage );
-        }
-
-        //if the slider is 100% and window gets larger, reveal content
-        function reflowContent() {
-                var showing = scrollContent.width() + parseInt( scrollContent.css( "margin-left" ), 10 );
-                var gap = scrollPane.width() - showing;
-                if ( gap > 0 ) {
-                    scrollContent.css( "margin-left", parseInt( scrollContent.css( "margin-left" ), 10 ) + gap );
-                }
-        }
-
-        //change handle position on window resize
-        $( window ).resize(function() {
-            resetValue();
-            sizeScrollbar();
-            reflowContent();
-        });
-        //init scrollbar size
-        setTimeout( sizeScrollbar, 10 );//safari wants a timeout
-        
-        $('.scroll-content').css('height', $(window).height() - $('#controls').height() - $('.scroll-bar-wrap').height() - 10);
-    });
-    </script>
-
-    <style>
-        #demo-frame > div.demo { padding: 10px !important; }
-        .scroll-pane { overflow: auto; width: 99%; float:left;}
-        .scroll-content { width: 2440px; float: left;}
-        .scroll-content-item { width: 100px; height: 100px; float: left; margin: 10px; font-size: 3em; text-align: center; }
-        * html .scroll-content-item { display: inline; } /* IE6 float double margin bug */
-        .scroll-bar-wrap { clear: left; padding: 0 4px 0 2px; margin: 0 -1px -1px -1px; }
-        .scroll-bar-wrap .ui-slider { background: none; border:0; height: 2em; margin: 0 auto;  }
-        .scroll-bar-wrap .ui-handle-helper-parent { position: relative; width: 100%; height: 100%; margin: 0 auto; }
-        .scroll-bar-wrap .ui-slider-handle { top:.2em; height: 1.5em; }
-        .scroll-bar-wrap .ui-slider-handle .ui-icon { margin: -8px auto 0; position: relative; top: 50%; }
-
-
-        div.currentConnectorStyle
-        {
-            background-color: red;
-        }
-
-        div.sourcePane
-        {
-            position: relative;
-            border-top-width: 1px;
-            border-right-width: 1px;
-            border-bottom-width: 1px;
-            border-left-width: 1px;
-            border-top-style: solid;
-            border-right-style: solid;
-            border-bottom-style: solid;
-            border-left-style: solid;
-            border-top-color: gray;
-            border-right-color: gray;
-            border-bottom-color: gray;
-            border-left-color: gray;
-            background-color: white;
-            left: 20px;
-            top: 100px;
-            width: 300px;
-            height: 200px;
-            z-index: 85;
-        }
-
-        div.sourcePane2
-        {
-            position: relative;
-            border-top-width: 1px;
-            border-right-width: 1px;
-            border-bottom-width: 1px;
-            border-left-width: 1px;
-            border-top-style: solid;
-            border-right-style: solid;
-            border-bottom-style: solid;
-            border-left-style: solid;
-            border-top-color: gray;
-            border-right-color: gray;
-            border-bottom-color: gray;
-            border-left-color: gray;
-            background-color: white;
-            left: 1200px;
-            top: 200px;
-            width: 300px;
-            height: 200px;
-            z-index: 85;
-        }
-
-        div.bar
-        {
-            height: 10px;
-            background-color: gray;
-            padding-top: 0px;
-            padding-right: 0px;
-            padding-bottom: 0px;
-            padding-left: 0px;
-            margin-top: 0px;
-            margin-right: 0px;
-            margin-bottom: 0px;
-            margin-left: 0px;
-            font-size: 9px;
-            cursor: pointer; 
-        }
-
-        div.ex
-        {
-            position: absolute;
-            padding-right: 2px;
-            padding-top: 1px;
-            padding-left: 2px;
-            font-family: sans-serif;
-            top: 0px;
-            left: 0px;
-            cursor: pointer;
-            font-size: 7px;
-            background-color: gray;
-            z-index: 100;
-            color: white;
-        }
-        
-        textarea.source
-        {
-            position: absolute;
-            resize: none;
-            overflow-x: scroll;
-            overflow-y: scroll;
-            font-size: 12px;
-            font-family: sans-serif;
-            border-top-style: none;
-            border-right-style: none;
-            border-bottom-style: none;
-            border-left-style: none;
-            border-width: initial;
-            border-color: initial;
-            z-index: 4;
-            width: 295px;
-            height: 185px;
-        }
-
-        div.resizer
-        {
-            position: absolute;
-            z-index: 10;
-            width: 10px;
-            height: 10px;
-            background-color: white;
-            font-size: 1px;
-            border-top-width: 1px;
-            border-right-width: 1px;
-            border-bottom-width: 1px;
-            border-left-width: 1px;
-            border-top-style: solid;
-            border-right-style: solid;
-            border-bottom-style: solid;
-            border-left-style: solid;
-            border-top-color: gray;
-            border-right-color: gray;
-            border-bottom-color: gray;
-            border-left-color: gray;
-            cursor: pointer;
-            left: 289px;
-            top: 189px;
-        }
-
-    </style>
+		div.currentConnectorStyle
+		{
+			background-color: red;
+		}
+		
+		
+		div.sourcePane
+		{
+			position: relative;
+			border-top-width: 1px;
+			border-right-width: 1px;
+			border-bottom-width: 1px;
+			border-left-width: 1px;
+			border-top-style: solid;
+			border-right-style: solid;
+			border-bottom-style: solid;
+			border-left-style: solid;
+			border-top-color: gray;
+			border-right-color: gray;
+			border-bottom-color: gray;
+			border-left-color: gray;
+			background-color: white;
+			left: 20px;
+			top: 100px;
+			width: 300px;
+			height: 200px;
+			z-index: 85;
+		}
+		
+		div.sourcePane2
+		{
+			position: relative;
+			border-top-width: 1px;
+			border-right-width: 1px;
+			border-bottom-width: 1px;
+			border-left-width: 1px;
+			border-top-style: solid;
+			border-right-style: solid;
+			border-bottom-style: solid;
+			border-left-style: solid;
+			border-top-color: gray;
+			border-right-color: gray;
+			border-bottom-color: gray;
+			border-left-color: gray;
+			background-color: white;
+			left: 1200px;
+			top: 200px;
+			width: 300px;
+			height: 200px;
+			z-index: 85;
+		}
+		
+		div.bar
+		{
+			height: 10px;
+			background-color: gray;
+			padding-top: 0px;
+			padding-right: 0px;
+			padding-bottom: 0px;
+			padding-left: 0px;
+			margin-top: 0px;
+			margin-right: 0px;
+			margin-bottom: 0px;
+			margin-left: 0px;
+			font-size: 9px;
+			cursor: pointer; 
+		}
+		
+		div.ex
+		{
+			position: absolute;
+			padding-right: 2px;
+			padding-top: 1px;
+			padding-left: 2px;
+			font-family: sans-serif;
+			top: 0px;
+			left: 0px;
+			cursor: pointer;
+			font-size: 7px;
+			background-color: gray;
+			z-index: 100;
+			color: white;
+		}
+		
+		textarea.source
+		{
+			position: absolute;
+			resize: none;
+			overflow-x: scroll;
+			overflow-y: scroll;
+			font-size: 12px;
+			font-family: sans-serif;
+			border-top-style: none;
+			border-right-style: none;
+			border-bottom-style: none;
+			border-left-style: none;
+			border-width: initial;
+			border-color: initial;
+			z-index: 4;
+			width: 295px;
+			height: 185px;
+		}
+		
+		div.resizer
+		{
+			position: absolute;
+			z-index: 10;
+			width: 10px;
+			height: 10px;
+			background-color: white;
+			font-size: 1px;
+			border-top-width: 1px;
+			border-right-width: 1px;
+			border-bottom-width: 1px;
+			border-left-width: 1px;
+			border-top-style: solid;
+			border-right-style: solid;
+			border-bottom-style: solid;
+			border-left-style: solid;
+			border-top-color: gray;
+			border-right-color: gray;
+			border-bottom-color: gray;
+			border-left-color: gray;
+			cursor: pointer;
+			left: 289px;
+			top: 189px;
+		}
+		
+	</style>
   </head>
   <body>
     <div id="openWin">
@@ -253,30 +257,30 @@
          <input type="text" name="filename" id="filename" spellcheck="false"/>
         </form>
       </div>
-    <div id="association" class="btn currentConnectorStyle">Association</div>
-    <div id="composition" class="btn">Composition</div>
-        <div id="inheritance" class="btn">Inheritance</div>
+	  <div id="association" class="btn currentConnectorStyle">Association</div>
+	  <div id="composition" class="btn">Composition</div>
+	  <div id="inheritance" class="btn">Inheritance</div>
     </div>
     <!--<div id="sourceBrowser"> -->
-    <div class="scroll-pane ui-widget ui-widget-header ui-corner-all">
-        <div class="scroll-content">
-            <div class="sourcePane scroll-content-item">
-                <div class="bar"></div>
-                <div class="ex">X</div>
-                <textarea class="source" spellcheck="false" wrap="off">Insert your Source Here!</textarea>
-                <div class="resizer"></div>
-            </div>
-            <div class="sourcePane2 scroll-content-item">
-                <div class="bar"></div>
-                <div class="ex">X</div>
-                <textarea class="source" spellcheck="false"></textarea>
-                <div class="resizer"></div>
-            </div>
+	<div class="scroll-pane ui-widget ui-widget-header ui-corner-all">
+		<div class="scroll-content">
+			<div class="sourcePane scroll-content-item">
+				<div class="bar"></div>
+				<div class="ex">X</div>
+				<textarea class="source" spellcheck="false" wrap="off">Insert your Source Here!</textarea>
+				<div class="resizer"></div>
+			</div>
+			<div class="sourcePane2 scroll-content-item">
+				<div class="bar"></div>
+				<div class="ex">X</div>
+				<textarea class="source" spellcheck="false"></textarea>
+				<div class="resizer"></div>
+			</div>
 
-        </div>
-        <div class="scroll-bar-wrap ui-widget-content ui-corner-bottom">
-            <div class="scroll-bar"></div>
-        </div>
-    </div>
+		</div>
+		<div class="scroll-bar-wrap ui-widget-content ui-corner-bottom">
+			<div class="scroll-bar"></div>
+		</div>
+	</div>
   </body>
 </html>
