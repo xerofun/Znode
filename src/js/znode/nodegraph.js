@@ -17,13 +17,14 @@ function NodeGraph(){
   var key = {};
   var SHIFT = 16;
   var topHeight = $("#controls").height();
+  var scrollBarHeight = $('.scroll-bar-wrap').height();
   
   var resizerWidth = 10;
   
   var paper = new Raphael("canvas", "100", "100");
   
   function resizePaper(){
-    paper.setSize(win.width(), win.height() - topHeight);
+    paper.setSize(canvas.width(), win.height() - topHeight - scrollBarHeight);
   }
   win.resize(resizePaper);
   resizePaper();
@@ -53,9 +54,6 @@ function NodeGraph(){
     var node, x, y;
     dir = dir.toLowerCase();
     
-    
-    
-      
     if (dir == "left"){
       x = pathEnd.x + 5;
       y = pathEnd.y - currentNode.height() / 2;
@@ -138,7 +136,7 @@ function NodeGraph(){
     overlay.hide();
     var creatingNewNode = newNode;
     
-    hitConnect.css({"left":mouseX - 5, "top":mouseY - 5});
+    hitConnect.css({"left":mouseX - 5 - parseInt(canvas.css('margin-left'), 10), "top":mouseY - 5});
     for (var i in nodes){
       if (nodes[i]){
         var n = nodes[i];
@@ -444,9 +442,9 @@ function NodeGraph(){
       newNode = true;
       
       var id = setInterval(function(){
-        link.attr("path","M " + x + " " + y + " L " + mouseX + " " + mouseY);
+        link.attr("path","M " + x + " " + y + " L " + (mouseX - parseInt(canvas.css('margin-left'), 10)) + " " + mouseY);
         
-        pathEnd.x = mouseX;
+        pathEnd.x = mouseX - parseInt(canvas.css('margin-left'), 10);
         pathEnd.y = mouseY;
       }, 30);
       loops.push(id);
@@ -470,6 +468,7 @@ function NodeGraph(){
     resizer.mousedown(function(e){
       currentNode = curr;
       e.preventDefault();
+      // TODO: Update max nodesize here
       startDrag(resizer, {left : 20, top : 20, right : 500, bottom : 500},
       function(){
         var loc = resizer.position();
@@ -495,7 +494,7 @@ function NodeGraph(){
       currentNode = curr;
       n.css("z-index", zindex++);
       e.preventDefault();
-      startDrag(n, {left : 10, top: 40, right : win.width() - n.width() - 10, bottom : win.height() - n.height() - 10},
+      startDrag(n, {left : 10, top: 40, right : canvas.width() - n.width() - 10, bottom : win.height() - n.height() - 10},
       updateConnections);
     });
     
@@ -554,7 +553,7 @@ function NodeGraph(){
     //alert("Zevan");
     var w = currentNode.width() || defaultWidth;
     var h = currentNode.height () || defaultHeight;
-    var temp = new Node(mouseX, mouseY + 30, w, h);
+    var temp = new Node(mouseX - parseInt(canvas.css('margin-left'), 10), mouseY, w, h);
     currentNode = temp;
     currentConnection = null;
   }
