@@ -599,6 +599,7 @@ function NodeGraph(){
       var ex = (i == "0") ? true : false;
       var temp = new Node(n.x, n.y, n.width, n.height, ex, n.id);
       temp.txt.val(n.txt);
+      temp.src.val(n.src);
     }
     for (i in data.connections){
       var c = data.connections[i];
@@ -615,7 +616,8 @@ function NodeGraph(){
       json += '"y" : ' + n.y() + ', ';
       json += '"width" : ' + n.width() + ', ';
       json += '"height" : ' + n.height() + ', ';
-      json += '"txt" : "' + addSlashes(n.txt.val()) + '"},';
+      json += '"txt" : "' + addSlashes(n.txt.val()) + '", ';
+      json += '"src" : "' + addSlashes(n.src.val()) + '"},';
     }
     json = json.substr(0, json.length - 1);
     json += '], "connections" : [';
