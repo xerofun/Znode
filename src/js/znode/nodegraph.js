@@ -360,6 +360,14 @@ function NodeGraph(){
                       "font-size": "7px",
                       "border" : "1px solid gray",
                       "cursor": "pointer"});
+
+    sourceButton.click(
+        function(){
+            // Swap z-indices of src and txt
+            tmpZ = src.css("z-index");
+            src.css({"z-index" : txt.css("z-index")});
+            txt.css({"z-index" : tmpZ});
+        });
     
     n.append("<div class='left'>");
     n.append("<div class='top'>");
