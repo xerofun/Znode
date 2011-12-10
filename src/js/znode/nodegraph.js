@@ -320,6 +320,21 @@ function NodeGraph(){
           
     this.txt = txt;
     
+    n.append("<textarea class='src' spellcheck='false' />");
+    
+    var src = $(".node .src").last();
+    src.css("position","absolute");
+    
+    src.css({"width" : nodeWidth - 5 - (resizerWidth + 1),
+             "height" : nodeHeight - bar.height() - 5,
+             "margin-left" : (resizerWidth + 1),
+             "resize" : "none",
+             "overflow" : "scroll",
+             "font-size" : "12px", "font-family" : "sans-serif",
+             "border" : "none", "z-index" : -1});
+             
+    this.src = src;
+    
     n.append("<div class='resizer' />");
     var resizer = $(".node .resizer").last();
     
@@ -478,6 +493,7 @@ function NodeGraph(){
                "height" : y + resizer.height() + 1});
         
         txt.css({"width" : n.width() - 5 - (resizerWidth + 1), "height" : n.height() - bar.height() - 5});
+        src.css({"width" : n.width() - 5 - (resizerWidth + 1), "height" : n.height() - bar.height() - 5});
         
         positionLeft();
         positionRight();
