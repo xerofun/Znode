@@ -19,6 +19,58 @@ function NodeGraph(){
   var topHeight = $("#controls").height();
   var scrollBarHeight = $('.scroll-bar-wrap').height();
   
+  var associationBtn = $('#association');
+  var compositionBtn = $('#composition');
+  var inheritanceBtn = $('#inheritance');
+  
+  var currentConnectionType = "Association";
+  
+  
+  associationBtn.click(
+    function()
+    {
+        // Set connector type
+        currentConnectionType = "Association";
+        
+        // Clear old current connector type
+        compositionBtn.removeClass('currentConnectorStyle');
+        inheritanceBtn.removeClass('currentConnectorStyle');
+        
+        // Add current connector type to association button
+        associationBtn.addClass('currentConnectorStyle');
+    }
+  );
+  
+  compositionBtn.click(
+    function()
+    {
+        // Set connector type
+        currentConnectionType = "Composition";
+        
+        // Clear old current connector type
+        associationBtn.removeClass('currentConnectorStyle');
+        inheritanceBtn.removeClass('currentConnectorStyle');
+        
+        // Add current connector type to association button
+        compositionBtn.addClass('currentConnectorStyle');
+    }
+  );
+  
+  inheritanceBtn.click(
+  function()
+  {
+      // Set connector type
+      currentConnectionType = "Inheritance";
+      
+      // Clear old current connector type
+      compositionBtn.removeClass('currentConnectorStyle');
+      associationBtn.removeClass('currentConnectorStyle');
+        
+      // Add current connector type to association button
+      inheritanceBtn.addClass('currentConnectorStyle');
+    }
+  );
+  
   var resizerWidth = 10;
   
   var paper = new Raphael("canvas", "100", "100");
@@ -57,7 +109,6 @@ function NodeGraph(){
     if (dir == "left"){
       x = pathEnd.x + 5;
       y = pathEnd.y - currentNode.height() / 2;
-      
     }else if (dir == "right"){
       x = pathEnd.x - currentNode.width() - 5;
       y = pathEnd.y - currentNode.height() / 2;
@@ -71,11 +122,11 @@ function NodeGraph(){
     
  
     node = new Node(x, y, currentNode.width(), currentNode.height());
-    saveConnection(node, dir);
+    saveConnection(node, dir, currentConnectionType);
     currentNode = node;
   }
   
-  function createConnection(a, conA, b, conB){
+  function createConnection(a, conA, b, conB, connectionType){ 
       var link = paper.path("M 0 0 L 1 1");
       link.attr({"stroke-width":2});
       link.parent = a[conA];
@@ -83,10 +134,11 @@ function NodeGraph(){
       a.addConnection(link);
       currentConnection = link;
       currentNode = a;
-      saveConnection(b, conB);
+
+      saveConnection(b, conB, connectionType);
   }
   
-  function saveConnection(node, dir){
+  function saveConnection(node, dir, connectionType){
     if (!currentConnection) return;
     if (!currentConnection.parent) return;
     
@@ -94,6 +146,11 @@ function NodeGraph(){
     currentConnection.endNode = node;
     currentConnection.startConnection = currentConnection.parent;
     currentConnection.endConnection = node[dir.toLowerCase()];
+    
+    if (!currentConnection.connectionType)
+    {
+      currentConnection.connectionType = connectionType;
+    }
     
     currentConnection.id = connectionId;
     connections[connectionId] = currentConnection;
@@ -143,19 +200,19 @@ function NodeGraph(){
         if (n != currentNode){
           var nLoc = n.content.position();
           if (hitTest(toGlobal(nLoc, n.left), hitConnect)){
-            saveConnection(n, "left");
+            saveConnection(n, "left", currentConnectionType);
             newNode = false;
             break;
           }else if (hitTest(toGlobal(nLoc, n.top), hitConnect)){
-            saveConnection(n, "top");
+            saveConnection(n, "top", currentConnectionType);
             newNode = false;
             break;
           }else if (hitTest(toGlobal(nLoc, n.right), hitConnect)){
-            saveConnection(n, "right");
+            saveConnection(n, "right", currentConnectionType);
             newNode = false;
             break;
           }else if (hitTest(toGlobal(nLoc, n.bottom), hitConnect)){
-            saveConnection(n, "bottom");
+            saveConnection(n, "bottom", currentConnectionType);
             newNode = false;
             break;
           }
@@ -233,6 +290,77 @@ function NodeGraph(){
     loops.push(id);
   }
   
+ 
+  /**
+   * Returns a path object that represents a composition connection from
+   * x1,y1 to x2,y2
+   */
+  function moveCompositionPath(path, x1, y1, x2, y2)
+  {
+    // TODO: Make this globally accessible?
+    size = 10;
+    
+    // Total distance from point to point
+    lineLength = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    
+    var angle = Math.atan2(x1-x2,y2-y1);
+    angle = (angle / (2 * Math.PI)) * 360;
+    
+    path.attr("path",    "M" + x2 + " " + y2 + 
+                        " L" + (x2 - size) + " " + (y2 - size) + 
+                        " L" + (x2 - 2 * size) + " " + y2 +
+                        " L" + (x2 - size) + " " + (y2 + size) + 
+                        " L" + x2 + " " + y2 +
+                        " M" + (x2 - 2 * size) + " " + y2 +
+                        " L" + (x2 - lineLength) + " " + y2 +
+                        " L" + (x2 - lineLength + size) + " " + (y2 - size) +
+                        " M" + (x2 - lineLength) + " " + y2 +
+                        " L" + (x2 - lineLength + size) + " " + (y2 + size)).rotate((90+angle),x2,y2);
+  }
+  
+  
+  /**
+   * Returns a path object that represents an inheritance connection from
+   * x1,y1 to x2,y2
+   */
+  function moveInheritancePath(path, x1, y1, x2, y2)
+  {
+    // TODO: Make this globally accessible?
+    size = 10;
+    
+    // Total distance from point to point
+    lineLength = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    
+    // Coordinates of where to stop drawing the line
+    xIntersect = x2 - (size * (Math.sqrt(3) / 2));
+    
+    var angle = Math.atan2(x1-x2,y2-y1);
+    angle = (angle / (2 * Math.PI)) * 360;
+    
+    path.attr("path",   "M" + x2 + " " + y2 +
+                       " L" + (x2 - size) + " " + (y2 - size) + 
+                       " L" + (x2 - size) + " " + (y2 + size) + 
+                       " L" + x2 + " " + y2 + 
+                       " M" + xIntersect + " " + y2 +                       
+                       " L" + (x2 - lineLength) + " " + y2).rotate((90+angle),x2,y2);
+  }
+  
+  /**
+   * Returns a path object that represents an inheritance connection from
+   * x1,y1 to x2,y2
+   */
+  function moveAssociationPath(path, x1, y1, x2, y2)
+  {
+    // Total distance from point to point
+    lineLength = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+   
+    var angle = Math.atan2(x1-x2,y2-y1);
+    angle = (angle / (2 * Math.PI)) * 360;
+    
+    path.attr("path",   "M" + x2 + " " + y2 +
+                       " L" + (x2 - lineLength) + " " + y2).rotate((90+angle),x2,y2);
+  }
+
   
   function Node(xp, yp, w, h, noDelete, forceId){
     
@@ -440,8 +568,19 @@ function NodeGraph(){
          if (!c.removed){
            var nodeA = c.startNode.connectionPos(c.startConnection);
            var nodeB = c.endNode.connectionPos(c.endConnection);
-           c.attr("path","M " + nodeA.x + " " + nodeA.y + " L " + nodeB.x + " " + nodeB.y);
-            
+
+           if (c.connectionType == 'Association')
+           {
+             moveAssociationPath(c, nodeA.x, nodeA.y, nodeB.x, nodeB.y);
+           }
+           else if (c.connectionType == 'Composition')
+           {
+             moveCompositionPath(c, nodeA.x, nodeA.y, nodeB.x, nodeB.y);
+           }
+           else if (c.connectionType == 'Inheritance')
+           {
+             moveInheritancePath(c, nodeA.x, nodeA.y, nodeB.x, nodeB.y);
+           }
          }
        }
     }
@@ -465,7 +604,19 @@ function NodeGraph(){
       newNode = true;
       
       var id = setInterval(function(){
-        link.attr("path","M " + x + " " + y + " L " + (mouseX - parseInt(canvas.css('margin-left'), 10)) + " " + mouseY);
+      
+           if (currentConnectionType == 'Association')
+           {
+             moveAssociationPath(link, x, y, (mouseX - parseInt(canvas.css('margin-left'), 10)), mouseY);
+           }
+           else if (currentConnectionType == 'Composition')
+           {
+             moveCompositionPath(link, x, y, (mouseX - parseInt(canvas.css('margin-left'), 10)), mouseY);
+           }
+           else if (currentConnectionType == 'Inheritance')
+           {
+             moveInheritancePath(link, x, y, (mouseX - parseInt(canvas.css('margin-left'), 10)), mouseY);
+           }
         
         pathEnd.x = mouseX - parseInt(canvas.css('margin-left'), 10);
         pathEnd.y = mouseY;
@@ -603,7 +754,7 @@ function NodeGraph(){
     }
     for (i in data.connections){
       var c = data.connections[i];
-      createConnection(nodes[c.nodeA], c.conA, nodes[c.nodeB], c.conB);
+      createConnection(nodes[c.nodeA], c.conA, nodes[c.nodeB], c.conB, c.connectionType);
     }
   }
   
@@ -629,7 +780,8 @@ function NodeGraph(){
       json += '{"nodeA" : ' + c.startNode.id + ', ';
       json += '"nodeB" : ' + c.endNode.id + ', ';
       json += '"conA" : "' + c.startConnection.attr("class") + '", ';
-      json += '"conB" : "' + c.endConnection.attr("class") + '"},';
+      json += '"conB" : "' + c.endConnection.attr("class") + '", ';
+      json += '"connectionType" : "' + c.connectionType + '"},';
       hasConnections = true;
       }
     }
