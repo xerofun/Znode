@@ -25,6 +25,9 @@ function NodeGraph(){
   
   var currentConnectionType = "Association";
   
+  var MIN_NODE_SIZE = 20;
+  var MAX_NODE_SIZE = 1600;
+  
   
   associationBtn.click(
     function()
@@ -643,7 +646,7 @@ function NodeGraph(){
       currentNode = curr;
       e.preventDefault();
       // TODO: Update max nodesize here
-      startDrag(resizer, {left : 20, top : 20, right : 500, bottom : 500},
+      startDrag(resizer, {left : MIN_NODE_SIZE, top : MIN_NODE_SIZE, right : MAX_NODE_SIZE, bottom : MAX_NODE_SIZE},
       function(){
         var loc = resizer.position();
         var x = loc.left;
