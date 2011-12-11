@@ -798,6 +798,7 @@ function NodeGraph(){
     str = str.replace(/\"/g,'\\\\"');
     str = str.replace(/\0/g,'\\0');
     str = str.replace(/\n/g,'\\\\n');
+    str = str.replace(/\t/g,'\\\\t');
     return str;
   }
 }
