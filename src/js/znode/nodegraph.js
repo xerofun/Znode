@@ -434,7 +434,7 @@ function NodeGraph(){
       });
     }
    
-    n.append("<textarea class='txt' spellcheck='false' />");
+    n.append("<textarea class='txt' spellcheck='false' wrap='off' />");
 
     var txt = $(".node .txt").last();
     txt.css("position","absolute");
@@ -448,7 +448,7 @@ function NodeGraph(){
           
     this.txt = txt;
     
-    n.append("<textarea class='src' spellcheck='false' />");
+    n.append("<textarea class='src' spellcheck='false' wrap='off' />");
     
     var src = $(".node .src").last();
     src.css("position","absolute");
